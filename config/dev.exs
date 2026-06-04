@@ -1,14 +1,25 @@
 import Config
 
 # Configure your database
-config :ecohabits, Ecohabits.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "ecohabits_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+case System.get_env("SUPABASE_DATABASE_URL") do
+  nil ->
+    config :ecohabits, Ecohabits.Repo,
+      username: "postgres",
+      password: "postgres",
+      hostname: "localhost",
+      database: "ecohabits_dev",
+      stacktrace: true,
+      show_sensitive_data_on_connection_error: true,
+      pool_size: 10
+
+  url ->
+    config :ecohabits, Ecohabits.Repo,
+      url: url,
+      ssl: true,
+      stacktrace: true,
+      show_sensitive_data_on_connection_error: true,
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+end
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -22,16 +22,20 @@ end
 
 if config_env() == :prod do
   database_url =
-    System.get_env("DATABASE_URL") ||
+    System.get_env("SUPABASE_DATABASE_URL") ||
+      System.get_env("DATABASE_URL") ||
       raise """
-      environment variable DATABASE_URL is missing.
+      environment variable SUPABASE_DATABASE_URL or DATABASE_URL is missing.
       For example: ecto://USER:PASS@HOST/DATABASE
       """
+
+  # If using Supabase, enable SSL for the Postgres connection
+  supabase_in_use = System.get_env("SUPABASE_DATABASE_URL") != nil
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :ecohabits, Ecohabits.Repo,
-    # ssl: true,
+    ssl: supabase_in_use,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     # For machines with several cores, consider starting multiple pools of `pool_size`
