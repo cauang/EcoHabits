@@ -21,26 +21,45 @@ if System.get_env("PHX_SERVER") do
 end
 
 if config_env() == :prod do
+  db_username = System.get_env("DB_USERNAME")
+  db_password = System.get_env("DB_PASSWORD")
+  db_host = System.get_env("DB_HOST")
+  db_port = System.get_env("DB_PORT") || "5432"
+  db_name = System.get_env("DB_NAME") || System.get_env("DB_DATABASE")
+
+  maybe_db_url =
+    if db_username && db_password && db_host && db_name do
+      username = URI.encode_www_form(db_username)
+      password = URI.encode_www_form(db_password)
+      "postgresql://#{username}:#{password}@#{db_host}:#{db_port}/#{db_name}"
+    end
+
   database_url =
     System.get_env("SUPABASE_DATABASE_URL") ||
       System.get_env("DATABASE_URL") ||
+      maybe_db_url ||
       raise """
-      environment variable SUPABASE_DATABASE_URL or DATABASE_URL is missing.
+      environment variable SUPABASE_DATABASE_URL or DATABASE_URL or DB_USERNAME/DB_PASSWORD/DB_HOST/DB_NAME is missing.
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  # If using Supabase, enable SSL for the Postgres connection
+  # If using Supabase, enable SSL and compatible preparation mode for the Postgres connection.
+  # Supabase transaction pooling (pgbouncer transaction mode) is not compatible with named prepared statements.
   supabase_in_use = System.get_env("SUPABASE_DATABASE_URL") != nil
-
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
-  config :ecohabits, Ecohabits.Repo,
+  repo_opts = [
     ssl: supabase_in_use,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    # For machines with several cores, consider starting multiple pools of `pool_size`
-    # pool_count: 4,
+    queue_target: String.to_integer(System.get_env("QUEUE_TARGET") || "50"),
+    queue_interval: String.to_integer(System.get_env("QUEUE_INTERVAL") || "1000"),
+    timeout: String.to_integer(System.get_env("DB_TIMEOUT") || "15000"),
     socket_options: maybe_ipv6
+  ]
+  repo_opts = if(supabase_in_use, do: [prepare: :unnamed] ++ repo_opts, else: repo_opts)
+
+  config :ecohabits, Ecohabits.Repo, repo_opts
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

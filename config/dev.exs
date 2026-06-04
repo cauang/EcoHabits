@@ -1,7 +1,22 @@
 import Config
 
 # Configure your database
-case System.get_env("SUPABASE_DATABASE_URL") do
+db_url =
+  System.get_env("SUPABASE_DATABASE_URL") ||
+    System.get_env("DATABASE_URL") ||
+    if System.get_env("DB_USERNAME") && System.get_env("DB_PASSWORD") && System.get_env("DB_HOST") &&
+         (System.get_env("DB_NAME") || System.get_env("DB_DATABASE")) do
+      username = URI.encode_www_form(System.get_env("DB_USERNAME"))
+      password = URI.encode_www_form(System.get_env("DB_PASSWORD"))
+      host = System.get_env("DB_HOST")
+      port = System.get_env("DB_PORT") || "5432"
+      database = System.get_env("DB_NAME") || System.get_env("DB_DATABASE")
+      "postgresql://#{username}:#{password}@#{host}:#{port}/#{database}"
+    end
+
+maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+
+case db_url do
   nil ->
     config :ecohabits, Ecohabits.Repo,
       username: "postgres",
@@ -15,10 +30,15 @@ case System.get_env("SUPABASE_DATABASE_URL") do
   url ->
     config :ecohabits, Ecohabits.Repo,
       url: url,
-      ssl: true,
+      ssl: [verify: :verify_none],
+      prepare: :unnamed,
       stacktrace: true,
       show_sensitive_data_on_connection_error: true,
-      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+      queue_target: String.to_integer(System.get_env("QUEUE_TARGET") || "50"),
+      queue_interval: String.to_integer(System.get_env("QUEUE_INTERVAL") || "1000"),
+      timeout: String.to_integer(System.get_env("DB_TIMEOUT") || "15000"),
+      socket_options: maybe_ipv6
 end
 
 # For development, we disable any cache and enable
