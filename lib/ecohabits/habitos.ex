@@ -49,6 +49,16 @@ defmodule Ecohabits.Habitos do
 
   def get_habito!(id), do: Repo.get!(Habito, id)
 
+  def update_habito(%Habito{} = habito, attrs) do
+    habito
+    |> Habito.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_habito(%Habito{} = habito) do
+    Repo.delete(habito)
+  end
+
   def fazer_checkin(habito_id, usuario_id) do
     %RegistroHabito{}
     |> RegistroHabito.changeset(%{
