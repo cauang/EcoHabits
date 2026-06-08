@@ -20,6 +20,7 @@ defmodule EcohabitsWeb.Router do
     get "/", PageController, :home
     live "/habitos", HabitoLive.Index, :index
     live "/habitos/novo", HabitoLive.Index, :new
+    live "/habitos/:id/editar", HabitoLive.Index, :edit
   end
 
   # Other scopes may use custom stacks.
