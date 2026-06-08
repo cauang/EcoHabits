@@ -1,16 +1,73 @@
-<div class="flex flex-col items-center justify-center min-h-screen bg-green-50 text-green-900">
-  <div class="max-w-3xl text-center px-4">
-    <h1 class="text-5xl font-extrabold tracking-tight mb-6 text-green-700">
-      Bem-vindo ao <span class="text-green-500">EcoHabits</span>
-    </h1>
-    <p class="text-xl mb-8">
-      Pequenas ações individuais geram impacto real. Registre seus hábitos sustentáveis, acumule pontos e faça a diferença na comunidade!
-    </p>
-    
-    <div class="mt-10 flex justify-center gap-4">
-      <.link navigate="/habitos" class="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full shadow-lg transition duration-300">
-        Gerenciar Meus Hábitos
-      </.link>
+    <div class="min-h-screen bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 flex items-center justify-center p-4">
+      <div class="w-full max-w-md">
+          <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg p-2">
+            <img src={~p"/images/logo.svg"} alt="EcoHabits Logo" class="w-full h-full object-contain" />
+          </div>
+          <h1 class="text-4xl text-white mb-2">EcoHabits</h1>
+          <p class="text-emerald-100">Hábitos sustentáveis, impacto real</p>
+        </div>
+
+        <%!-- Login Card --%>
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+          <h2 class="text-2xl text-gray-800 mb-6">Entrar na sua conta</h2>
+
+          <form class="space-y-5" onsubmit="return false;">
+            <%!-- Email --%>
+            <div>
+              <label class="block text-sm text-gray-700 mb-2">E-mail</label>
+              <div class="relative">
+                <.icon name="hero-envelope-solid" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  placeholder="seu@email.com"
+                  class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <%!-- Password --%>
+            <div>
+              <label class="block text-sm text-gray-700 mb-2">Senha</label>
+              <div class="relative">
+                <.icon name="hero-lock-closed-solid" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <%!-- Remember & Forgot --%>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500" />
+                <span class="text-sm text-gray-600">Lembrar-me</span>
+              </label>
+              <a href="#" class="text-sm text-emerald-600 hover:text-emerald-700">
+                Esqueceu a senha?
+              </a>
+            </div>
+
+            <%!-- Login Button --%>
+            <.link
+              navigate={~p"/habitos"}
+              class="block w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-center"
+            >
+              Entrar
+            </.link>
+          </form>
+
+          <%!-- Signup Link --%>
+          <div class="mt-6 text-center">
+            <p class="text-gray-600">
+              Não tem uma conta?
+              <a href="#" class="text-emerald-600 hover:text-emerald-700">
+                Cadastre-se
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>

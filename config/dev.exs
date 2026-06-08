@@ -1,45 +1,27 @@
 import Config
 
-# Configure your database
-db_url =
-  System.get_env("SUPABASE_DATABASE_URL") ||
-    System.get_env("DATABASE_URL") ||
-    if System.get_env("DB_USERNAME") && System.get_env("DB_PASSWORD") && System.get_env("DB_HOST") &&
-         (System.get_env("DB_NAME") || System.get_env("DB_DATABASE")) do
-      username = URI.encode_www_form(System.get_env("DB_USERNAME"))
-      password = URI.encode_www_form(System.get_env("DB_PASSWORD"))
-      host = System.get_env("DB_HOST")
-      port = System.get_env("DB_PORT") || "5432"
-      database = System.get_env("DB_NAME") || System.get_env("DB_DATABASE")
-      "postgresql://#{username}:#{password}@#{host}:#{port}/#{database}"
+if File.exists?(".env") do
+  File.read!(".env")
+  |> String.split(["\r\n", "\n"], trim: true)
+  |> Enum.each(fn line ->
+    case String.split(line, "=", parts: 2) do
+      [key, value] ->
+        key = String.trim(key)
+        unless String.starts_with?(key, "#") or key == "" do
+          System.put_env(key, String.trim(value))
+        end
+      _ -> :ok
     end
-
-maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
-
-case db_url do
-  nil ->
-    config :ecohabits, Ecohabits.Repo,
-      username: "postgres",
-      password: "postgres",
-      hostname: "localhost",
-      database: "ecohabits_dev",
-      stacktrace: true,
-      show_sensitive_data_on_connection_error: true,
-      pool_size: 10
-
-  url ->
-    config :ecohabits, Ecohabits.Repo,
-      url: url,
-      ssl: [verify: :verify_none],
-      prepare: :unnamed,
-      stacktrace: true,
-      show_sensitive_data_on_connection_error: true,
-      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-      queue_target: String.to_integer(System.get_env("QUEUE_TARGET") || "50"),
-      queue_interval: String.to_integer(System.get_env("QUEUE_INTERVAL") || "1000"),
-      timeout: String.to_integer(System.get_env("DB_TIMEOUT") || "15000"),
-      socket_options: maybe_ipv6
+  end)
 end
+
+config :ecohabits, Ecohabits.Repo,
+  url: System.get_env("SUPABASE_DATABASE_URL") || System.get_env("DATABASE_URL"),
+  ssl: [verify: :verify_none],
+  prepare: :unnamed,
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
