@@ -35,40 +35,43 @@ defmodule EcohabitsWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+    <div class="min-h-screen bg-[#f4fbf8]">
+      <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center gap-2">
+              <div class="bg-white border border-teal-100 rounded-full p-1 flex items-center justify-center w-10 h-10 shadow-sm">
+                <img src={~p"/images/logo.svg"} alt="EcoHabits Logo" class="w-full h-full object-contain" />
+              </div>
+              <span class="text-2xl font-semibold text-teal-700 tracking-tight">EcoHabits</span>
+            </div>
+            
+            <nav class="hidden md:flex space-x-2">
+              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
+              </a>
+              <a href="/habitos" class="flex items-center gap-2 px-4 py-2 text-teal-800 bg-teal-100 font-medium rounded-lg transition-colors">
+                <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
+              </a>
+              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <.icon name="hero-users" class="w-5 h-5" /> Comunidade
+              </a>
+              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <.icon name="hero-user" class="w-5 h-5" /> Perfil
+              </a>
+            </nav>
+          </div>
+        </div>
+      </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+      <main class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
 
-    <.flash_group flash={@flash} />
+      <.flash_group flash={@flash} />
+    </div>
     """
   end
 
