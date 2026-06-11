@@ -5,61 +5,63 @@ defmodule EcohabitsWeb.Layouts do
   """
   use EcohabitsWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
-  @doc """
-  Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
-
-  ## Examples
-
-      <Layouts.app flash={@flash}>
-        <h1>Content</h1>
-      </Layouts.app>
-
-  """
   attr :flash, :map, required: true, doc: "the map of flash messages"
-
-  attr :current_scope, :map,
-    default: nil,
-    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
-
+  attr :current_scope, :map, default: nil, doc: "the current scope"
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
     <div class="min-h-screen bg-[#f4fbf8]">
-      <header class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between h-16 items-center">
+      <header class="bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="flex justify-between h-20 items-center">
+
             <div class="flex items-center gap-2">
-              <div class="bg-white border border-teal-100 rounded-full p-1 flex items-center justify-center w-10 h-10 shadow-sm">
+              <div class="bg-white border border-emerald-100 rounded-full p-1 flex items-center justify-center w-10 h-10 shadow-sm">
                 <img src={~p"/images/logo.svg"} alt="EcoHabits Logo" class="w-full h-full object-contain" />
               </div>
-              <span class="text-2xl font-semibold text-teal-700 tracking-tight">EcoHabits</span>
+              <span class="text-2xl font-bold text-emerald-800 tracking-tight">EcoHabits</span>
             </div>
-            
-            <nav class="hidden md:flex space-x-2">
-              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
-              </a>
-              <a href="/habitos" class="flex items-center gap-2 px-4 py-2 text-teal-800 bg-teal-100 font-medium rounded-lg transition-colors">
-                <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
-              </a>
-              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                <.icon name="hero-users" class="w-5 h-5" /> Comunidade
-              </a>
-              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                <.icon name="hero-user" class="w-5 h-5" /> Perfil
-              </a>
+
+            <nav class="flex space-x-4 items-center">
+              <%= if assigns[:current_scope] && assigns[:current_scope].user do %>
+                <.link href={~p"/"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-emerald-600 font-medium rounded-xl transition-colors">
+                  <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
+                </.link>
+                <.link href={~p"/habitos"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-emerald-600 font-medium rounded-xl transition-colors">
+                  <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
+                </.link>
+                <.link href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-emerald-600 font-medium rounded-xl transition-colors">
+                  <.icon name="hero-users" class="w-5 h-5" /> Comunidade
+                </.link>
+
+                <.link href={~p"/users/settings"} class="text-xs text-gray-400 hover:text-gray-600 px-2">
+                  { @current_scope.user.email }
+                </.link>
+
+                <.link
+                  href={~p"/perfil"}
+                  class="flex items-center gap-2 px-5 py-2.5 text-[#009b74] bg-[#e6f4f0] hover:bg-[#d8ede7] font-bold rounded-xl transition-all shadow-sm"
+                >
+                  <.icon name="hero-user" class="w-5 h-5" /> Perfil
+                </.link>
+
+                <.link
+                  href={~p"/users/log-out"}
+                  method="delete"
+                  class="flex items-center gap-2 px-4 py-2 text-red-500 hover:text-red-600 font-medium rounded-xl transition-colors text-sm"
+                >
+                  Sair
+                </.link>
+              <% else %>
+                <.link href={~p"/users/log-in"} class="flex items-center gap-2 px-6 py-2.5 text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl transition-colors shadow-sm">
+                  Entrar
+                </.link>
+              <% end %>
             </nav>
+
           </div>
         </div>
       </header>
@@ -70,20 +72,10 @@ defmodule EcohabitsWeb.Layouts do
         </div>
       </main>
 
-      <.flash_group flash={@flash} />
+      <.flash_group id="flash-group" flash={@flash} />
     </div>
     """
   end
-
-  @doc """
-  Shows the flash group with standard titles and content.
-
-  ## Examples
-
-      <.flash_group flash={@flash} />
-  """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
-  attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
 
   def flash_group(assigns) do
     ~H"""
@@ -118,37 +110,20 @@ defmodule EcohabitsWeb.Layouts do
     """
   end
 
-  @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
-  """
   def theme_toggle(assigns) do
     ~H"""
     <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
       <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
 
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-      >
+      <button class="flex p-2 cursor-pointer w-1/3" phx-click={JS.dispatch("phx:set-theme")} data-phx-theme="system">
         <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>
 
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="light"
-      >
+      <button class="flex p-2 cursor-pointer w-1/3" phx-click={JS.dispatch("phx:set-theme")} data-phx-theme="light">
         <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>
 
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="dark"
-      >
+      <button class="flex p-2 cursor-pointer w-1/3" phx-click={JS.dispatch("phx:set-theme")} data-phx-theme="dark">
         <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>
     </div>
