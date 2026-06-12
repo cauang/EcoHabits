@@ -89,7 +89,7 @@ defmodule EcohabitsWeb.Layouts do
                   <span class="text-sm font-medium text-gray-700">{ @current_scope.user.name }</span>
                   <div class="flex items-center gap-1 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-sm font-bold shadow-inner">
                     <.icon name="hero-star-solid" class="w-4 h-4 text-emerald-500" />
-                    { Ecohabits.Habitos.total_points(@current_scope.user.id) } pts
+                    { @current_scope.user.points || 0 } pts
                   </div>
                 </div>
               <% end %>

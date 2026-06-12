@@ -252,6 +252,14 @@ defmodule EcohabitsWeb.UserAuth do
           Accounts.get_user_by_session_token(user_token)
         end || {nil, nil}
 
+      user =
+        if user do
+          points = Ecohabits.Habitos.total_points(user.id)
+          %{user | points: points}
+        else
+          user
+        end
+
       Scope.for_user(user)
     end)
   end

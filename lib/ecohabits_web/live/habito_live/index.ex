@@ -34,14 +34,7 @@ defmodule EcohabitsWeb.HabitoLive.Index do
     }
     habitos = Habitos.list_habitos(criteria)
 
-    # Remover hábitos já checados hoje para este usuário (ficam invisíveis até o dia seguinte)
-    habitos_visiveis =
-      case socket.assigns[:habitos_checados_hoje] do
-        nil -> habitos
-        checked_set -> Enum.reject(habitos, fn h -> MapSet.member?(checked_set, h.id) end)
-      end
-
-    assign(socket, :habitos, habitos_visiveis)
+    assign(socket, :habitos, habitos)
   end
 
   @impl true
@@ -289,7 +282,7 @@ defmodule EcohabitsWeb.HabitoLive.Index do
 
                 <%= if checkin_feito?(habito, @habitos_checados_hoje) do %>
                   <div class="w-full py-3 rounded-lg bg-emerald-100 text-emerald-700 text-center font-semibold">
-                    <.icon name="hero-check" class="w-5 h-5 inline-block mr-2" /> Já marcado hoje — volta amanhã
+                    <.icon name="hero-check" class="w-5 h-5 inline-block mr-2" /> Realizado Hoje
                   </div>
                 <% else %>
                   <button phx-click="checkin" phx-value-id={habito.id} class="w-full py-3 rounded-lg transition-all bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-md hover:shadow-lg">
