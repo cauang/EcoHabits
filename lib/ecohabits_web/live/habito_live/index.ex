@@ -3,10 +3,13 @@ defmodule EcohabitsWeb.HabitoLive.Index do
 
   alias Ecohabits.Habitos
   alias Ecohabits.Habitos.Habito
+  require Logger
 
   @impl true
   def mount(_params, _session, socket) do
+    usuario_id = socket.assigns.current_scope.user.id
     changeset = Habitos.change_habito(%Habito{})
+
     socket =
       socket
       |> stream(:habitos, [])
@@ -16,7 +19,9 @@ defmodule EcohabitsWeb.HabitoLive.Index do
       |> assign(:habito_editando, nil)
       |> assign(:habito_excluir, nil)
       |> assign(:categorias, Habitos.list_categorias())
-      |> assign(:pontuacao_semanal, Habitos.obter_pontuacao_semanal(socket.assigns.current_scope.user.id))
+      |> assign(:pontuacao_semanal, Habitos.obter_pontuacao_semanal(usuario_id))
+      |> assign(:habitos_checados_hoje, Habitos.list_habitos_checados_hoje(usuario_id))
+      |> assign(:active_nav, "habitos")
       |> fetch_habitos()
     {:ok, socket}
   end
@@ -27,7 +32,16 @@ defmodule EcohabitsWeb.HabitoLive.Index do
       busca: socket.assigns.busca,
       usuario_id: socket.assigns.current_scope.user.id
     }
-    assign(socket, :habitos, Habitos.list_habitos(criteria))
+    habitos = Habitos.list_habitos(criteria)
+
+    # Remover hábitos já checados hoje para este usuário (ficam invisíveis até o dia seguinte)
+    habitos_visiveis =
+      case socket.assigns[:habitos_checados_hoje] do
+        nil -> habitos
+        checked_set -> Enum.reject(habitos, fn h -> MapSet.member?(checked_set, h.id) end)
+      end
+
+    assign(socket, :habitos, habitos_visiveis)
   end
 
   @impl true
@@ -75,29 +89,62 @@ defmodule EcohabitsWeb.HabitoLive.Index do
 
   def handle_event("checkin", %{"id" => id}, socket) do
     usuario_id = socket.assigns.current_scope.user.id
-    habito = Habitos.get_habito!(id)
-    case Habitos.fazer_checkin(id, usuario_id) do
-      {:ok, _} ->
-        # Atualiza a pontuação localmente no socket para o header reagir
-        pontuacao_atual = socket.assigns.pontuacao_semanal
+
+    Logger.debug("[HabitoLive] checkin event received, id=#{inspect(id)}, usuario_id=#{inspect(usuario_id)}")
+
+    id_int =
+      case id do
+        i when is_integer(i) -> i
+        s when is_binary(s) -> String.to_integer(s)
+      end
+
+    habito = Habitos.get_habito!(id_int)
+
+    Logger.debug("[HabitoLive] attempting checkin for habito_id=#{id_int} user=#{usuario_id}")
+
+    case Habitos.fazer_checkin(id_int, usuario_id) do
+      {:ok, _registro} ->
+        Logger.debug("[HabitoLive] checkin succeeded for habito_id=#{id_int} user=#{usuario_id}")
+        Phoenix.PubSub.broadcast(
+          Ecohabits.PubSub,
+          "checkins:feed",
+          {:new_checkin, habito, socket.assigns.current_scope.user}
+        )
+
+        # recarrega o conjunto de hábitos checados hoje do banco para evitar inconsistências
+        habitos_checados = Habitos.list_habitos_checados_hoje(usuario_id)
 
         {:noreply,
          socket
-         |> assign(:pontuacao_semanal, pontuacao_atual + habito.pontuacao)
+         |> assign(:pontuacao_semanal, Habitos.obter_pontuacao_semanal(usuario_id))
+         |> assign(:habitos_checados_hoje, habitos_checados)
          |> put_flash(:info, "Check-in realizado com sucesso! +#{habito.pontuacao} pontos.")
          |> fetch_habitos()}
-      {:error, changeset} ->
-        mensagem = if changeset.errors[:unique_checkin_diario], do: "Você já fez o check-in hoje neste hábito!", else: "Não foi possível fazer o check-in."
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        # extrai mensagem amigável do changeset quando possível
+        mensagem =
+          changeset.errors
+          |> Enum.map(fn {field, {msg, _opts}} -> "#{Phoenix.Naming.humanize(field)}: #{msg}" end)
+          |> Enum.join("; ")
+
+        mensagem = if mensagem == "", do: "Não foi possível fazer o check-in.", else: mensagem
+
+        Logger.debug("[HabitoLive] checkin changeset error: #{inspect(changeset.errors)}")
         {:noreply, put_flash(socket, :error, mensagem)}
+
+      {:error, reason} ->
+        Logger.debug("[HabitoLive] checkin error reason: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Erro ao fazer check-in: #{inspect(reason)}")}
     end
   end
 
   def handle_event("save", %{"habito" => habit_params}, socket) do
-    habit_params = 
+    habit_params =
       habit_params
       |> Map.put("usuario_id", socket.assigns.current_scope.user.id)
       |> Map.update("pontuacao", "0", fn p -> if p == "", do: "0", else: p end)
-      
+
     resultado =
       if socket.assigns.habito_editando do
         Habitos.update_habito(socket.assigns.habito_editando, habit_params)
@@ -151,14 +198,15 @@ defmodule EcohabitsWeb.HabitoLive.Index do
   defp border_gradient_categoria(5), do: "from-emerald-400 to-emerald-500"
   defp border_gradient_categoria(_), do: "from-green-400 to-green-500"
 
-  defp checkin_feito?(habito) do
-    is_list(habito.registros) and habito.registros != []
+  defp checkin_feito?(habito, habitos_checados_hoje) do
+    MapSet.member?(habitos_checados_hoje || MapSet.new(), habito.id) or
+      (Ecto.assoc_loaded?(habito.registros) and habito.registros != [])
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} pontuacao_semanal={@pontuacao_semanal}>
+    <Layouts.app flash={@flash} current_scope={@current_scope} pontuacao_semanal={@pontuacao_semanal} active_nav={@active_nav}>
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
@@ -200,9 +248,15 @@ defmodule EcohabitsWeb.HabitoLive.Index do
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <%= for habito <- @habitos do %>
-            <div class={["bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow", checkin_feito?(habito) && "ring-2 ring-emerald-400"]}>
-              <div class={["h-2 bg-gradient-to-r", border_gradient_categoria(habito.categoria_id)]}></div>
-              
+            <div class={[
+              "bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow",
+              checkin_feito?(habito, @habitos_checados_hoje) && "ring-2 ring-emerald-400"
+            ]}>
+              <div class={[
+                "h-2 bg-gradient-to-r",
+                border_gradient_categoria(habito.categoria_id)
+              ]}></div>
+
               <div class="p-6">
                 <div class="flex items-start justify-between mb-3">
                   <h3 class="text-lg text-gray-800 flex-1">{habito.nome}</h3>
@@ -220,9 +274,9 @@ defmodule EcohabitsWeb.HabitoLive.Index do
                     </button>
                   </div>
                 </div>
-                
+
                 <p class="text-sm text-gray-600 mb-4">{habito.descricao}</p>
-                
+
                 <div class="flex items-center gap-2 mb-4">
                   <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
                     {if Ecto.assoc_loaded?(habito.categoria) && habito.categoria, do: habito.categoria.nome, else: "Outros"}
@@ -232,11 +286,11 @@ defmodule EcohabitsWeb.HabitoLive.Index do
                     <span class="text-sm">+{habito.pontuacao} pts</span>
                   </div>
                 </div>
-                
-                <%= if checkin_feito?(habito) do %>
-                  <button class="w-full py-3 rounded-lg transition-all bg-emerald-100 text-emerald-700 cursor-default flex items-center justify-center gap-2">
-                    <.icon name="hero-check" class="w-5 h-5" /> Realizado hoje
-                  </button>
+
+                <%= if checkin_feito?(habito, @habitos_checados_hoje) do %>
+                  <div class="w-full py-3 rounded-lg bg-emerald-100 text-emerald-700 text-center font-semibold">
+                    <.icon name="hero-check" class="w-5 h-5 inline-block mr-2" /> Já marcado hoje — volta amanhã
+                  </div>
                 <% else %>
                   <button phx-click="checkin" phx-value-id={habito.id} class="w-full py-3 rounded-lg transition-all bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-md hover:shadow-lg">
                     Fazer check-in
@@ -253,32 +307,39 @@ defmodule EcohabitsWeb.HabitoLive.Index do
             <h2 class="text-2xl text-gray-800 mb-6">
               {if @live_action == :edit, do: "Editar Hábito", else: "Novo Hábito Sustentável"}
             </h2>
-            <.form for={@form} id="habito-form" phx-submit="save" class="space-y-4">
-              <div :if={@form.errors[:usuario_id]} class="p-3 bg-red-100 text-red-700 rounded-lg text-sm mb-4">
-                <.icon name="hero-exclamation-circle" class="w-5 h-5 inline mr-1" />
-                {translate_error(Enum.at(@form.errors[:usuario_id], 0) || {"Erro de usuário", []})}
+
+            <%= if Enum.any?(@form.errors) do %>
+              <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 mb-4">
+                <div class="font-semibold mb-2">Corrija os erros abaixo:</div>
+                <ul class="list-disc list-inside space-y-1">
+                  <%= for {field, {message, opts}} <- @form.errors do %>
+                    <li><strong><%= Phoenix.Naming.humanize(field) %>:</strong> <%= translate_error({message, opts}) %></li>
+                  <% end %>
+                </ul>
               </div>
-              
+            <% end %>
+
+            <.form for={@form} id="habito-form" phx-submit="save" action={~p"/habitos/novo"} method="post" class="space-y-4">
               <div>
                 <label class="block text-sm text-gray-700 mb-2">Nome do hábito</label>
                 <.input field={@form[:nome]} type="text" placeholder="Ex: Separar lixo reciclável" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800" />
               </div>
-              
+
               <div>
                 <label class="block text-sm text-gray-700 mb-2">Descrição</label>
                 <.input field={@form[:descricao]} type="textarea" placeholder="Descreva o hábito..." rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800" />
               </div>
-              
+
               <div>
                 <label class="block text-sm text-gray-700 mb-2">Categoria</label>
                 <.input field={@form[:categoria_id]} type="select" options={Enum.map(@categorias, &{&1.nome, &1.id})} class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800" />
               </div>
-              
+
               <div>
                 <label class="block text-sm text-gray-700 mb-2">Pontuação</label>
                 <.input field={@form[:pontuacao]} type="number" placeholder="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800" />
               </div>
-              
+
               <div class="flex gap-3 mt-6">
                 <.link patch={~p"/habitos"} class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-center">
                   Cancelar
@@ -303,7 +364,7 @@ defmodule EcohabitsWeb.HabitoLive.Index do
               Tem certeza que deseja excluir permanentemente o hábito <strong>{ @habito_excluir.nome }</strong>?<br/>
               Essa ação não pode ser desfeita e os check-ins serão perdidos.
             </p>
-            
+
             <div class="flex gap-3">
               <button phx-click="cancelar_exclusao" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                 Cancelar

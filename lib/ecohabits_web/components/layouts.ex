@@ -32,6 +32,7 @@ defmodule EcohabitsWeb.Layouts do
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
   attr :pontuacao_semanal, :integer, default: 0
+  attr :active_nav, :string, default: nil
 
   slot :inner_block, required: true
 
@@ -47,27 +48,48 @@ defmodule EcohabitsWeb.Layouts do
               </div>
               <span class="text-2xl font-semibold text-teal-700 tracking-tight">EcoHabits</span>
             </div>
-            
+
             <nav class="hidden md:flex space-x-2">
-              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
-              </a>
-              <a href="/habitos" class="flex items-center gap-2 px-4 py-2 text-teal-800 bg-teal-100 font-medium rounded-lg transition-colors">
-                <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
-              </a>
-              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                <.icon name="hero-users" class="w-5 h-5" /> Comunidade
-              </a>
-              <a href="#" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <.link
+              navigate={~p"/dashboard"}
+              class={[
+                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                @active_nav == "dashboard" && "bg-teal-100 text-teal-900",
+                @active_nav != "dashboard" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ]}
+            >
+              <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
+            </.link>
+            <.link
+              navigate={~p"/habitos"}
+              class={[
+                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                @active_nav == "habitos" && "bg-teal-100 text-teal-900",
+                @active_nav != "habitos" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ]}
+            >
+              <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
+            </.link>
+            <.link
+              navigate={~p"/comunidade"}
+              class={[
+                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                @active_nav == "comunidade" && "bg-teal-100 text-teal-900",
+                @active_nav != "comunidade" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ]}
+            >
+              <.icon name="hero-users" class="w-5 h-5" /> Comunidade
+            </.link>
+              <.link navigate={~p"/users/settings"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                 <.icon name="hero-user" class="w-5 h-5" /> Perfil
-              </a>
-              
+              </.link>
+
               <%= if @current_scope && @current_scope.user do %>
                 <div class="flex items-center gap-3 bg-white border border-gray-100 shadow-sm rounded-full pl-3 pr-1 py-1 ml-2">
                   <span class="text-sm font-medium text-gray-700">{ @current_scope.user.name }</span>
                   <div class="flex items-center gap-1 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-sm font-bold shadow-inner">
                     <.icon name="hero-star-solid" class="w-4 h-4 text-emerald-500" />
-                    { assigns[:pontuacao_semanal] || 0 } pts
+                    { Ecohabits.Habitos.total_points(@current_scope.user.id) } pts
                   </div>
                 </div>
               <% end %>
@@ -80,13 +102,13 @@ defmodule EcohabitsWeb.Layouts do
           {render_slot(@inner_block)}
         </div>
       </main>
-      
+
       <%= if @current_scope && @current_scope.user do %>
         <div class="fixed bottom-6 left-6 z-40">
-          <.link 
-            href={~p"/users/log-out"} 
-            method="delete" 
-            class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-full shadow-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 hover:shadow-md transition-all group" 
+          <.link
+            href={~p"/users/log-out"}
+            method="delete"
+            class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-full shadow-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 hover:shadow-md transition-all group"
             title="Sair da conta"
           >
             <.icon name="hero-arrow-right-start-on-rectangle" class="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" />

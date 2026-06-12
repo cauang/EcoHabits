@@ -25,6 +25,7 @@ defmodule EcohabitsWeb.UserLive.Login do
             for={@form}
             id="login_form_password"
             action={~p"/users/log-in"}
+            phx-change="validate"
             phx-submit="submit_password"
             phx-trigger-action={@trigger_submit}
             class="space-y-5"
@@ -38,7 +39,6 @@ defmodule EcohabitsWeb.UserLive.Login do
                   type="email"
                   name={f[:email].name}
                   value={f[:email].value}
-                  readonly={!!@current_scope}
                   placeholder="seu@email.com"
                   class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
@@ -117,5 +117,9 @@ defmodule EcohabitsWeb.UserLive.Login do
      socket
      |> put_flash(:info, info)
      |> push_navigate(to: ~p"/users/log-in")}
+  end
+
+  def handle_event("validate", %{"user" => user_params}, socket) do
+    {:noreply, assign(socket, form: to_form(user_params, as: "user"))}
   end
 end

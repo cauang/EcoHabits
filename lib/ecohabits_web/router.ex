@@ -44,8 +44,12 @@ defmodule EcohabitsWeb.Router do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
 
+      live "/dashboard", DashboardLive, :index
+      live "/comunidade", FeedLive, :index
+
       live "/habitos", HabitoLive.Index, :index
       live "/habitos/novo", HabitoLive.Index, :new
+
       live "/habitos/:id/editar", HabitoLive.Index, :edit
     end
 
@@ -56,8 +60,7 @@ defmodule EcohabitsWeb.Router do
     pipe_through [:browser]
 
     live_session :current_user,
-      on_mount: [{EcohabitsWeb.UserAuth, :mount_current_scope}],
-      layout: false do
+      on_mount: [{EcohabitsWeb.UserAuth, :mount_current_scope}] do
 
       live "/", UserLive.Login, :new
       live "/users/register", UserLive.Registration, :new
