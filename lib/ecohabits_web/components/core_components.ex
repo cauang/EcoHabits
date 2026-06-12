@@ -56,13 +56,13 @@ defmodule EcohabitsWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="pointer-events-auto"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
+        "flex items-start gap-3 p-4 rounded-xl shadow-xl border w-80 sm:w-96 text-wrap transition-all",
+        @kind == :info && "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400",
+        @kind == :error && "bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400"
       ]}>
         <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
@@ -468,5 +468,29 @@ defmodule EcohabitsWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  @doc """
+  Renders a modal.
+  """
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :on_cancel, Phoenix.LiveView.JS, default: %Phoenix.LiveView.JS{}
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H"""
+    <dialog id={@id} class={["modal", @show && "modal-open"]} phx-remove={@on_cancel} phx-window-keydown={@on_cancel} phx-key="escape">
+      <div class="modal-box">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" phx-click={@on_cancel} type="button">✕</button>
+        </form>
+        {render_slot(@inner_block)}
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button phx-click={@on_cancel} type="button">close</button>
+      </form>
+    </dialog>
+    """
   end
 end

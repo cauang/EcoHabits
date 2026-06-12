@@ -31,44 +31,93 @@ defmodule EcohabitsWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :pontuacao_semanal, :integer, default: 0
+  attr :active_nav, :string, default: nil
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+    <div class="min-h-screen bg-[#f4fbf8]">
+      <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center gap-2">
+              <div class="bg-white border border-teal-100 rounded-full p-1 flex items-center justify-center w-10 h-10 shadow-sm">
+                <img src={~p"/images/logo.svg"} alt="EcoHabits Logo" class="w-full h-full object-contain" />
+              </div>
+              <span class="text-2xl font-semibold text-teal-700 tracking-tight">EcoHabits</span>
+            </div>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+            <nav class="hidden md:flex space-x-2">
+              <.link
+              navigate={~p"/dashboard"}
+              class={[
+                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                @active_nav == "dashboard" && "bg-teal-100 text-teal-900",
+                @active_nav != "dashboard" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ]}
+            >
+              <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
+            </.link>
+            <.link
+              navigate={~p"/habitos"}
+              class={[
+                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                @active_nav == "habitos" && "bg-teal-100 text-teal-900",
+                @active_nav != "habitos" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ]}
+            >
+              <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
+            </.link>
+            <.link
+              navigate={~p"/comunidade"}
+              class={[
+                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                @active_nav == "comunidade" && "bg-teal-100 text-teal-900",
+                @active_nav != "comunidade" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              ]}
+            >
+              <.icon name="hero-users" class="w-5 h-5" /> Comunidade
+            </.link>
+              <.link navigate={~p"/users/settings"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <.icon name="hero-user" class="w-5 h-5" /> Perfil
+              </.link>
 
-    <.flash_group flash={@flash} />
+              <%= if @current_scope && @current_scope.user do %>
+                <div class="flex items-center gap-3 bg-white border border-gray-100 shadow-sm rounded-full pl-3 pr-1 py-1 ml-2">
+                  <span class="text-sm font-medium text-gray-700">{ @current_scope.user.name }</span>
+                  <div class="flex items-center gap-1 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-sm font-bold shadow-inner">
+                    <.icon name="hero-star-solid" class="w-4 h-4 text-emerald-500" />
+                    { Ecohabits.Habitos.total_points(@current_scope.user.id) } pts
+                  </div>
+                </div>
+              <% end %>
+            </nav>
+          </div>
+        </div>
+      </header>
+      <main class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+
+      <%= if @current_scope && @current_scope.user do %>
+        <div class="fixed bottom-6 left-6 z-40">
+          <.link
+            href={~p"/users/log-out"}
+            method="delete"
+            class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-full shadow-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 hover:shadow-md transition-all group"
+            title="Sair da conta"
+          >
+            <.icon name="hero-arrow-right-start-on-rectangle" class="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" />
+          </.link>
+        </div>
+      <% end %>
+
+      <.flash_group flash={@flash} />
+    </div>
     """
   end
 
@@ -84,7 +133,7 @@ defmodule EcohabitsWeb.Layouts do
 
   def flash_group(assigns) do
     ~H"""
-    <div id={@id} aria-live="polite">
+    <div id={@id} aria-live="polite" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end pointer-events-none">
       <.flash kind={:info} flash={@flash} />
       <.flash kind={:error} flash={@flash} />
 
