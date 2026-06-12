@@ -50,12 +50,21 @@ defmodule Ecohabits.Habitos do
   def get_habito!(id), do: Repo.get!(Habito, id)
 
   def fazer_checkin(habito_id, usuario_id) do
-    %RegistroHabito{}
-    |> RegistroHabito.changeset(%{
-      habito_id: habito_id,
-      usuario_id: usuario_id,
-      data_realizacao: Date.utc_today()
-    })
-    |> Repo.insert()
+    try do
+      %RegistroHabito{}
+      |> RegistroHabito.changeset(%{
+        habito_id: habito_id,
+        usuario_id: usuario_id,
+        data_realizacao: Date.utc_today()
+      })
+      |> Repo.insert()
+    rescue
+      _e in Ecto.ConstraintError ->
+        changeset =
+          %RegistroHabito{}
+          |> Ecto.Changeset.change()
+          |> Ecto.Changeset.add_error(:habito_id, "Erro ao realizar check-in (possível duplicata).")
+        {:error, changeset}
+    end
   end
 end
