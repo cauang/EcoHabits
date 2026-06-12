@@ -56,7 +56,7 @@ defmodule EcohabitsWeb.DashboardLive do
           <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex items-center justify-between mb-4">
               <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <.icon name="hero-target" class="w-7 h-7 text-blue-600" />
+                <.icon name="hero-fire" class="w-7 h-7 text-blue-600" />
               </div>
               <span class="text-blue-600 text-sm"><%= if @stats.monthly_checkins > 0 do %><%= div(@stats.monthly_checkins * 100, 143) %><% else %>0<% end %>%</span>
             </div>
@@ -137,7 +137,7 @@ defmodule EcohabitsWeb.DashboardLive do
                 <div class="flex flex-col gap-4 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl hover:from-emerald-100 hover:to-teal-100 transition-colors lg:flex-row lg:items-center lg:justify-between">
                   <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                      <.icon name="hero-leaf" class="w-6 h-6 text-emerald-600" />
+                      <.icon name={category_icon(registro.category)} class="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
                       <div class="text-gray-800 mb-1 font-medium"><%= registro.habit %></div>
@@ -204,4 +204,23 @@ defmodule EcohabitsWeb.DashboardLive do
     </div>
     """
   end
+
+  defp category_icon("Alimentação"), do: "hero-cake"
+  defp category_icon("Transporte"), do: "hero-truck"
+  defp category_icon("Energia"), do: "hero-bolt"
+  defp category_icon("Água"), do: "hero-beaker"
+  defp category_icon("Resíduos"), do: "hero-arrow-path-rounded-square"
+  defp category_icon(c) when is_binary(c) do
+    # Fallback normalizando caso venha sem acento ou minúsculo
+    normalized = String.downcase(c)
+    cond do
+      String.contains?(normalized, "alimenta") -> "hero-cake"
+      String.contains?(normalized, "transport") -> "hero-truck"
+      String.contains?(normalized, "energia") -> "hero-bolt"
+      String.contains?(normalized, "agua") or String.contains?(normalized, "água") -> "hero-beaker"
+      String.contains?(normalized, "residuos") or String.contains?(normalized, "resíduos") -> "hero-arrow-path-rounded-square"
+      true -> "hero-leaf"
+    end
+  end
+  defp category_icon(_), do: "hero-leaf"
 end
