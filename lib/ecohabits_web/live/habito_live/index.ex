@@ -78,7 +78,7 @@ defmodule EcohabitsWeb.HabitoLive.Index do
          |> fetch_habitos()}
 
       {:error, changeset} ->
-        mensagem = if changeset.errors[:unique_checkin_diario], do: "Você já fez o check-in hoje neste hábito!", else: "Não foi possível fazer o check-in."
+        mensagem = if changeset.errors[:habito_id], do: "Você já fez o check-in hoje neste hábito!", else: "Não foi possível fazer o check-in."
         {:noreply, put_flash(socket, :error, mensagem)}
     end
   end

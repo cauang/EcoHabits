@@ -15,8 +15,9 @@ defmodule Ecohabits.Habitos.RegistroHabito do
     registro
     |> cast(attrs, [:data_realizacao, :habito_id, :usuario_id])
     |> validate_required([:data_realizacao, :habito_id, :usuario_id])
+    |> unsafe_validate_unique([:habito_id, :usuario_id, :data_realizacao], Ecohabits.Repo, message: "Check-in já realizado hoje para este hábito.")
+    |> unique_constraint([:habito_id, :usuario_id, :data_realizacao], message: "Check-in já realizado hoje para este hábito.")
     |> foreign_key_constraint(:habito_id, name: :fk_registros_habito)
     |> foreign_key_constraint(:usuario_id, name: :fk_registros_usuario)
-    |> unique_constraint([:habito_id, :usuario_id, :data_realizacao], name: :unique_checkin_diario, message: "Check-in já realizado hoje para este hábito.")
   end
 end
