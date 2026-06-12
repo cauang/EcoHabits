@@ -400,6 +400,7 @@ defmodule Ecohabits.Habitos do
 
     pontuacao_existente = Repo.get_by(PontuacaoSemanal, usuario_id: usuario_id, inicio_semana: inicio_semana)
 
+
     if pontuacao_existente do
       pontuacao_existente
       |> Ecto.Changeset.change(total_pontos: pontuacao_existente.total_pontos + pontuacao)

@@ -60,7 +60,8 @@ defmodule EcohabitsWeb.Router do
     pipe_through [:browser]
 
     live_session :current_user,
-      on_mount: [{EcohabitsWeb.UserAuth, :mount_current_scope}] do
+      on_mount: [{EcohabitsWeb.UserAuth, :mount_current_scope}],
+      layout: false do
 
       live "/", UserLive.Login, :new
       live "/users/register", UserLive.Registration, :new

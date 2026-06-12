@@ -9,7 +9,6 @@ defmodule EcohabitsWeb.HabitoLive.Index do
   def mount(_params, _session, socket) do
     usuario_id = socket.assigns.current_scope.user.id
     changeset = Habitos.change_habito(%Habito{})
-
     socket =
       socket
       |> stream(:habitos, [])
@@ -137,7 +136,6 @@ defmodule EcohabitsWeb.HabitoLive.Index do
       habit_params
       |> Map.put("usuario_id", socket.assigns.current_scope.user.id)
       |> Map.update("pontuacao", "0", fn p -> if p == "", do: "0", else: p end)
-
     resultado =
       if socket.assigns.habito_editando do
         Habitos.update_habito(socket.assigns.habito_editando, habit_params)
@@ -249,7 +247,6 @@ defmodule EcohabitsWeb.HabitoLive.Index do
                 "h-2 bg-gradient-to-r",
                 border_gradient_categoria(habito.categoria_id)
               ]}></div>
-
               <div class="p-6">
                 <div class="flex items-start justify-between mb-3">
                   <h3 class="text-lg text-gray-800 flex-1">{habito.nome}</h3>
@@ -269,7 +266,6 @@ defmodule EcohabitsWeb.HabitoLive.Index do
                 </div>
 
                 <p class="text-sm text-gray-600 mb-4">{habito.descricao}</p>
-
                 <div class="flex items-center gap-2 mb-4">
                   <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
                     {if Ecto.assoc_loaded?(habito.categoria) && habito.categoria, do: habito.categoria.nome, else: "Outros"}

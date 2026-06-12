@@ -116,6 +116,7 @@ defmodule EcohabitsWeb.Layouts do
         </div>
       <% end %>
 
+
       <.flash_group flash={@flash} />
     </div>
     """
