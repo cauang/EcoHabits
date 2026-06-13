@@ -58,9 +58,9 @@ defmodule EcohabitsWeb.DashboardLive do
               <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                 <.icon name="hero-fire" class="w-7 h-7 text-blue-600" />
               </div>
-              <span class="text-blue-600 text-sm"><%= if @stats.monthly_checkins > 0 do %><%= div(@stats.monthly_checkins * 100, 143) %><% else %>0<% end %>%</span>
+              <span class="text-blue-600 text-sm"><%= safe_percent(@stats.monthly_checkins, 143) %>%</span>
             </div>
-            <div class="text-3xl text-gray-800 mb-1"><%= @stats.monthly_checkins %>/143</div>
+            <div class="text-3xl text-gray-800 mb-1"><%= @stats.monthly_checkins || 0 %>/143</div>
             <div class="text-gray-600 text-sm">Check-ins este mês</div>
           </div>
 
@@ -179,18 +179,18 @@ defmodule EcohabitsWeb.DashboardLive do
 
   defp weekly_bar_width(points, weekly_data) do
     max_points = weekly_data |> Enum.map(& &1.points) |> Enum.max(fn -> 1 end)
-    min(max(div(points * 100, max_points), 10), 100)
+    min(max(safe_percent(points, max_points), 10), 100)
   end
 
   defp monthly_bar_width(points, monthly_data) do
     max_points = monthly_data |> Enum.map(& &1.points) |> Enum.max(fn -> 1 end)
-    min(max(div(points * 100, max_points), 10), 100)
+    min(max(safe_percent(points, max_points), 10), 100)
   end
 
   defp goal_row(label, value, target) do
-    percent = min(div(value * 100, target), 100)
+    percent = min(safe_percent(value || 0, target), 100)
 
-    assigns = %{label: label, value: value, target: target, percent: percent}
+    assigns = %{label: label, value: value || 0, target: target, percent: percent}
 
     ~H"""
     <div>
@@ -205,11 +205,18 @@ defmodule EcohabitsWeb.DashboardLive do
     """
   end
 
+  defp safe_percent(numerator, denominator) when is_integer(numerator) and is_integer(denominator) and denominator > 0 do
+    div(numerator * 100, denominator)
+  end
+
+  defp safe_percent(_, _), do: 0
+
   defp category_icon("Alimentação"), do: "hero-cake"
   defp category_icon("Transporte"), do: "hero-truck"
   defp category_icon("Energia"), do: "hero-bolt"
   defp category_icon("Água"), do: "hero-beaker"
   defp category_icon("Resíduos"), do: "hero-arrow-path-rounded-square"
+
   defp category_icon(c) when is_binary(c) do
     # Fallback normalizando caso venha sem acento ou minúsculo
     normalized = String.downcase(c)
@@ -222,5 +229,6 @@ defmodule EcohabitsWeb.DashboardLive do
       true -> "hero-leaf"
     end
   end
+
   defp category_icon(_), do: "hero-leaf"
 end

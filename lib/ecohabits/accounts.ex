@@ -105,6 +105,16 @@ defmodule Ecohabits.Accounts do
     User.email_changeset(user, attrs, opts)
   end
 
+  def change_user_profile(user, attrs \\ %{}, opts \\ []) do
+    User.profile_changeset(user, attrs, opts)
+  end
+
+  def update_user_profile(user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
   @doc """
   Updates the user email using the given token.
 

@@ -31,6 +31,8 @@ defmodule EcohabitsWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :active_nav, :string, default: nil
+
   attr :pontuacao_semanal, :integer, default: 0
   attr :active_nav, :string, default: nil
 
@@ -51,36 +53,43 @@ defmodule EcohabitsWeb.Layouts do
 
             <nav class="hidden md:flex space-x-2">
               <.link
-              navigate={~p"/dashboard"}
-              class={[
-                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
-                @active_nav == "dashboard" && "bg-teal-100 text-teal-900",
-                @active_nav != "dashboard" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              ]}
-            >
-              <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
-            </.link>
-            <.link
-              navigate={~p"/habitos"}
-              class={[
-                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
-                @active_nav == "habitos" && "bg-teal-100 text-teal-900",
-                @active_nav != "habitos" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              ]}
-            >
-              <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
-            </.link>
-            <.link
-              navigate={~p"/comunidade"}
-              class={[
-                "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
-                @active_nav == "comunidade" && "bg-teal-100 text-teal-900",
-                @active_nav != "comunidade" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              ]}
-            >
-              <.icon name="hero-users" class="w-5 h-5" /> Comunidade
-            </.link>
-              <.link navigate={~p"/users/settings"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                navigate={~p"/dashboard"}
+                class={[
+                  "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                  @active_nav == "dashboard" && "bg-teal-100 text-teal-900",
+                  @active_nav != "dashboard" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                ]}
+              >
+                <.icon name="hero-chart-bar" class="w-5 h-5" /> Dashboard
+              </.link>
+              <.link
+                navigate={~p"/habitos"}
+                class={[
+                  "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                  @active_nav == "habitos" && "bg-teal-100 text-teal-900",
+                  @active_nav != "habitos" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                ]}
+              >
+                <.icon name="hero-queue-list" class="w-5 h-5" /> Hábitos
+              </.link>
+              <.link
+                navigate={~p"/comunidade"}
+                class={[
+                  "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                  @active_nav == "comunidade" && "bg-teal-100 text-teal-900",
+                  @active_nav != "comunidade" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                ]}
+              >
+                <.icon name="hero-users" class="w-5 h-5" /> Comunidade
+              </.link>
+              <.link
+                navigate={~p"/perfil"}
+                class={[
+                  "flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition-colors",
+                  @active_nav == "perfil" && "bg-teal-100 text-teal-900",
+                  @active_nav != "perfil" && "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                ]}
+              >
                 <.icon name="hero-user" class="w-5 h-5" /> Perfil
               </.link>
 
@@ -115,6 +124,7 @@ defmodule EcohabitsWeb.Layouts do
           </.link>
         </div>
       <% end %>
+
 
       <.flash_group flash={@flash} />
     </div>

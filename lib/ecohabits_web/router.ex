@@ -51,6 +51,7 @@ defmodule EcohabitsWeb.Router do
       live "/habitos/novo", HabitoLive.Index, :new
 
       live "/habitos/:id/editar", HabitoLive.Index, :edit
+      live "/perfil", UserLive.UserProfileLive, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password
@@ -60,7 +61,8 @@ defmodule EcohabitsWeb.Router do
     pipe_through [:browser]
 
     live_session :current_user,
-      on_mount: [{EcohabitsWeb.UserAuth, :mount_current_scope}] do
+      on_mount: [{EcohabitsWeb.UserAuth, :mount_current_scope}],
+      layout: false do
 
       live "/", UserLive.Login, :new
       live "/users/register", UserLive.Registration, :new

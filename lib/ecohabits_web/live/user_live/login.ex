@@ -39,6 +39,7 @@ defmodule EcohabitsWeb.UserLive.Login do
                   type="email"
                   name={f[:email].name}
                   value={f[:email].value}
+                  readonly={!!@current_scope}
                   placeholder="seu@email.com"
                   class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
