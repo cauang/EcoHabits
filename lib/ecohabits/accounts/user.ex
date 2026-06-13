@@ -75,13 +75,6 @@ defmodule Ecohabits.Accounts.User do
     end
   end
 
-  defp validate_email_changed(changeset) do
-    if get_field(changeset, :email) && get_change(changeset, :email) == nil do
-      add_error(changeset, :email, "não sofreu alteração")
-    else
-      changeset
-    end
-  end
 
   # Changeset para trocar a senha
   def password_changeset(user, attrs, opts \\ []) do
