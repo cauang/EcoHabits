@@ -34,7 +34,6 @@ defmodule EcohabitsWeb.Layouts do
   attr :active_nav, :string, default: nil
 
   attr :pontuacao_semanal, :integer, default: 0
-  attr :active_nav, :string, default: nil
 
   slot :inner_block, required: true
 
