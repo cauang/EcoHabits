@@ -5,6 +5,7 @@ defmodule Ecohabits.Accounts.User do
   schema "users" do
     field :email, :string
     field :name, :string
+    field :bio, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
@@ -30,6 +31,32 @@ defmodule Ecohabits.Accounts.User do
     |> validate_password(opts)
   end
 
+  def profile_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:name, :email, :bio])
+    |> validate_required([:name, :email])
+    |> validate_profile_email(opts)
+    |> validate_length(:bio, max: 160)
+  end
+
+  defp validate_profile_email(changeset, opts) do
+    changeset =
+      changeset
+      |> validate_required([:email])
+      |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/,
+        message: "formato de e-mail inválido"
+      )
+      |> validate_length(:email, max: 160)
+
+    if Keyword.get(opts, :validate_unique, true) and get_change(changeset, :email) do
+      changeset
+      |> unsafe_validate_unique(:email, Ecohabits.Repo)
+      |> unique_constraint(:email)
+    else
+      changeset
+    end
+  end
+
   defp validate_email(changeset, opts) do
     changeset =
       changeset
@@ -43,7 +70,6 @@ defmodule Ecohabits.Accounts.User do
       changeset
       |> unsafe_validate_unique(:email, Ecohabits.Repo)
       |> unique_constraint(:email)
-      |> validate_email_changed()
     else
       changeset
     end

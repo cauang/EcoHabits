@@ -50,6 +50,7 @@ defmodule EcohabitsWeb.Layouts do
             </div>
 
             <nav class="hidden md:flex space-x-2">
+            <nav class="hidden md:flex space-x-2">
               <.link
               navigate={~p"/dashboard"}
               class={[
@@ -80,7 +81,7 @@ defmodule EcohabitsWeb.Layouts do
             >
               <.icon name="hero-users" class="w-5 h-5" /> Comunidade
             </.link>
-              <.link navigate={~p"/users/settings"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <.link navigate={~p"/perfil"} class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                 <.icon name="hero-user" class="w-5 h-5" /> Perfil
               </.link>
 

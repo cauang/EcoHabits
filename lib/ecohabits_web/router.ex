@@ -51,6 +51,7 @@ defmodule EcohabitsWeb.Router do
       live "/habitos/novo", HabitoLive.Index, :new
 
       live "/habitos/:id/editar", HabitoLive.Index, :edit
+      live "/perfil", UserLive.UserProfileLive, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password
