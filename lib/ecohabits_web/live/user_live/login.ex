@@ -16,7 +16,7 @@ defmodule EcohabitsWeb.UserLive.Login do
           <p class="text-emerald-100">Hábitos sustentáveis, impacto real</p>
         </div>
 
-        <%!-- Login Card --%>
+
         <div class="bg-white rounded-2xl shadow-2xl p-8">
           <h2 class="text-2xl text-gray-800 mb-6">Entrar na sua conta</h2>
 
@@ -30,7 +30,7 @@ defmodule EcohabitsWeb.UserLive.Login do
             phx-trigger-action={@trigger_submit}
             class="space-y-5"
           >
-            <%!-- Email --%>
+
             <div>
               <label class="block text-sm text-gray-700 mb-2">E-mail</label>
               <div class="relative">
@@ -46,7 +46,7 @@ defmodule EcohabitsWeb.UserLive.Login do
               </div>
             </div>
 
-            <%!-- Password --%>
+
             <div>
               <label class="block text-sm text-gray-700 mb-2">Senha</label>
               <div class="relative">
@@ -63,7 +63,7 @@ defmodule EcohabitsWeb.UserLive.Login do
             </div>
 
 
-            <%!-- Login Button --%>
+
             <button
               class="block w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-center"
             >
@@ -71,7 +71,7 @@ defmodule EcohabitsWeb.UserLive.Login do
             </button>
           </.form>
 
-          <%!-- Signup Link --%>
+
           <div class="mt-6 text-center">
             <p class="text-gray-600">
               Não tem uma conta?

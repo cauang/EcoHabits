@@ -1,9 +1,4 @@
 defmodule Ecohabits.Habitos do
-  @moduledoc """
-  O contexto de Hábitos.
-  Aqui residem as regras de negócio para a gestão de hábitos sustentáveis.
-  Módulo B - Gestão de Hábitos
-  """
 
   import Ecto.Query, warn: false
   require Logger

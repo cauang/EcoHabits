@@ -7,7 +7,7 @@ defmodule Ecohabits.Habitos.Categoria do
     field :descricao, :string
   end
 
-  @doc false
+  @doc false 
   def changeset(categoria, attrs) do
     categoria
     |> cast(attrs, [:nome, :descricao])

@@ -9,7 +9,7 @@ defmodule EcohabitsWeb.UserLive.Registration do
     ~H"""
     <div class="min-h-screen bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 flex items-center justify-center p-4">
       <div class="w-full max-w-md">
-        <%!-- Logo --%>
+
         <div class="text-center mb-8">
           <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg p-2">
             <img src={~p"/images/logo.svg"} alt="EcoHabits Logo" class="w-full h-full object-contain" />
@@ -18,12 +18,12 @@ defmodule EcohabitsWeb.UserLive.Registration do
           <p class="text-emerald-100">Comece sua jornada sustentável</p>
         </div>
 
-        <%!-- Signup Card --%>
+
         <div class="bg-white rounded-2xl shadow-2xl p-8">
           <h2 class="text-2xl text-gray-800 mb-6">Criar conta</h2>
 
           <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate" class="space-y-5">
-            <%!-- Name --%>
+
             <div>
               <label class="block text-sm text-gray-700 mb-2">Nome completo</label>
               <div class="relative">
@@ -43,7 +43,7 @@ defmodule EcohabitsWeb.UserLive.Registration do
               </p>
             </div>
 
-            <%!-- Email --%>
+
             <div>
               <label class="block text-sm text-gray-700 mb-2">E-mail</label>
               <div class="relative">
@@ -64,7 +64,7 @@ defmodule EcohabitsWeb.UserLive.Registration do
               </p>
             </div>
 
-            <%!-- Password --%>
+
             <div>
               <label class="block text-sm text-gray-700 mb-2">Senha</label>
               <div class="relative">
@@ -85,7 +85,7 @@ defmodule EcohabitsWeb.UserLive.Registration do
               </p>
             </div>
 
-            <%!-- Confirm Password --%>
+
             <div>
               <label class="block text-sm text-gray-700 mb-2">Confirmar senha</label>
               <div class="relative">
@@ -106,7 +106,7 @@ defmodule EcohabitsWeb.UserLive.Registration do
               </p>
             </div>
 
-            <%!-- Signup Button --%>
+
             <button
               class="block w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-center"
               phx-disable-with="Criando conta..."
@@ -115,7 +115,7 @@ defmodule EcohabitsWeb.UserLive.Registration do
             </button>
           </.form>
 
-          <%!-- Login Link --%>
+
           <div class="mt-6 text-center">
             <p class="text-gray-600">
               Já tem uma conta?{" "}

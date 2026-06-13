@@ -15,14 +15,14 @@ defmodule Ecohabits.Accounts.User do
     timestamps(type: :utc_datetime)
   end
 
-  # Cria um changeset para registro ou alteração de e-mail
+
   def email_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email])
     |> validate_email(opts)
   end
 
-  # Changeset principal para criar conta com nome, e-mail e senha
+
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:name, :email, :password])
@@ -76,7 +76,7 @@ defmodule Ecohabits.Accounts.User do
   end
 
 
-  # Changeset para trocar a senha
+
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
@@ -88,10 +88,7 @@ defmodule Ecohabits.Accounts.User do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 12, max: 72)
-    # Examples of additional password validation:
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
+
     |> maybe_hash_password(opts)
   end
 
@@ -101,8 +98,7 @@ defmodule Ecohabits.Accounts.User do
 
     if hash_password? && password && changeset.valid? do
       changeset
-      # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
-      # would keep the database transaction open longer and hurt performance.
+
       |> put_change(:hashed_password, Pbkdf2.hash_pwd_salt(password))
       |> delete_change(:password)
     else
@@ -110,19 +106,19 @@ defmodule Ecohabits.Accounts.User do
     end
   end
 
-  # Confirma a conta gerando a data atual
+
   def confirm_changeset(user) do
     now = DateTime.utc_now(:second)
     change(user, confirmed_at: now)
   end
 
-  # Checa se a senha é válida usando Pbkdf2 ou texto puro (legado)
+
   def valid_password?(%Ecohabits.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     if String.starts_with?(hashed_password, "$pbkdf2") do
       Pbkdf2.verify_pass(password, hashed_password)
     else
-      # Fallback para o banco legado que tinha senha em plain-text
+
       hashed_password == password
     end
   end

@@ -7,7 +7,6 @@ defmodule Ecohabits.Habitos.Habito do
     field :descricao, :string
     field :pontuacao, :integer
 
-    # Relacionamentos
     belongs_to :categoria, Ecohabits.Habitos.Categoria
     belongs_to :usuario, Ecohabits.Accounts.User
     has_many :registros, Ecohabits.Habitos.RegistroHabito
