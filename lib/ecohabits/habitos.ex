@@ -28,7 +28,7 @@ defmodule Ecohabits.Habitos do
         busca_like = "%#{busca}%"
         where(query, [h], ilike(h.nome, ^busca_like) or ilike(h.descricao, ^busca_like))
       else
-        query
+        query 
       end
 
     usuario_id = criteria[:usuario_id] || 1
